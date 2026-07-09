@@ -51,12 +51,13 @@
     _resize(){
       const rect=this._root.getBoundingClientRect();
       if(!rect.width||!rect.height)return;
-      const dpr=Math.min(window.devicePixelRatio||1,2);
+      const dpr=Math.min(window.devicePixelRatio||1,3);
       this._canvas.width=Math.round(rect.width*dpr);
       this._canvas.height=Math.round(rect.height*dpr);
       this._canvas.style.width=rect.width+'px';
       this._canvas.style.height=rect.height+'px';
       this._ctx.setTransform(dpr,0,0,dpr,0,0);
+      this._ctx.imageSmoothingEnabled=false;
 
       const columns=Math.ceil(rect.width/10);
       const rows=Math.ceil(rect.height/20);
@@ -98,6 +99,7 @@
       this._ctx.clearRect(0,0,rect.width,rect.height);
       this._ctx.font='16px ui-monospace, SFMono-Regular, Consolas, monospace';
       this._ctx.textBaseline='top';
+      this._ctx.imageSmoothingEnabled=false;
       for(let i=0;i<this._letters.length;i++){
         const letter=this._letters[i];
         const x=(i%this._grid.columns)*10;
