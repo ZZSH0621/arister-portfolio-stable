@@ -21,6 +21,27 @@
 
       this._pull=pull;
       this._video=video;
+      const heroRef=this;
+
+      // Preload full video via Fetch -> Blob URL (eliminates buffering lag)
+      const videoUrl=(video.querySelector('source')||video).getAttribute('src');
+      if(videoUrl&&!videoUrl.startsWith('blob:')){
+        const hint=pull.querySelector('.hero__pull-hint');
+        if(hint)hint.textContent='预加载中…';
+        fetch(videoUrl).then(function(r){
+          if(!r.ok)throw new Error('Fetch failed');
+          return r.blob();
+        }).then(function(blob){
+          const blobUrl=URL.createObjectURL(blob);
+          var sourceEl=video.querySelector('source');
+          if(sourceEl)sourceEl.remove();
+          video.src=blobUrl;
+          if(hint)hint.textContent='下拉切换视频';
+        }).catch(function(){
+          if(hint)hint.textContent='下拉切换视频';
+        });
+      }
+
       const setVideoAudible=(audible)=>{
         video.muted=!audible;
         video.defaultMuted=!audible;
@@ -45,13 +66,11 @@
       setVideoAudible(true);
       video.setAttribute('playsinline','');
       video.setAttribute('webkit-playsinline','');
-      video.load();
       window.setTimeout(()=>{
         if(!hero.classList.contains('is-video-active')){
           video.preload='auto';
-          video.load();
         }
-      },4000);
+      },2000);
       const threshold=68;
       const maxPull=96;
       let startY=0;
@@ -81,15 +100,27 @@
           video.pause();
           setVideoAudible(true);
           syncSoundToggle();
-          video.currentTime=0;
+          // Resume WebGL render loop
+          if(!heroRef._cleanup&&heroRef._renderFrame) heroRef._cleanup=App.Utils.raf(heroRef._renderFrame);
           return;
         }
+
+        // Pause WebGL render loop — free GPU for video decoding
+        if(heroRef._cleanup){heroRef._cleanup();heroRef._cleanup=null;}
 
         setVideoAudible(true);
         video.setAttribute('playsinline','');
         video.setAttribute('webkit-playsinline','');
-        try{video.currentTime=0;}catch(_){}
-        playWithSound();
+        if(video.readyState >= 3){
+          try{video.currentTime=0;}catch(_){}
+          playWithSound();
+        }else{
+          video.addEventListener('canplay',function readyHandler(){
+            video.removeEventListener('canplay',readyHandler);
+            try{video.currentTime=0;}catch(_){}
+            playWithSound();
+          },{once:true});
+        }
       };
       const finish=(pointerId)=>{
         if(!dragging)return;
@@ -281,10 +312,11 @@
       },200);
       window.addEventListener('resize',onResize);
 
-      this._cleanup=App.Utils.raf((t)=>{
+      this._renderFrame=(t)=>{
         mat.uniforms.uTime.value=t*0.001;
         this._renderer.render(this._scene,camera);
-      });
+      };
+      this._cleanup=App.Utils.raf(this._renderFrame);
     },
 
     destroy(){if(this._cleanup)this._cleanup()}

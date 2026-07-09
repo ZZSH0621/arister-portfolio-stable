@@ -73,6 +73,9 @@ window.__I18N={
     "subdomains.photo.desc":"美术风格图片素材与 caption 分析展示页。",
     "subdomains.mental.label":"心理健康",
     "subdomains.mental.title":"A-glimmer-of-Light",
+    "subdomains.visual.label":"视觉美学",
+    "subdomains.visual.title":"Visual Aesthetics",
+    "subdomains.visual.desc":"光影、镜头语言与视觉风格的交互式学习页面。",
     "subdomains.mental.desc":"引导青少年直视内心，面对世界！",
 
     "blog.label":"博客",
@@ -172,6 +175,9 @@ window.__I18N={
     "subdomains.mental.label":"Mental Health",
     "subdomains.mental.title":"A-glimmer-of-Light",
     "subdomains.mental.desc":"Guiding adolescents to face their inner world, and then the world outside.",
+    "subdomains.visual.label":"Visual Study",
+    "subdomains.visual.title":"Visual Aesthetics",
+    "subdomains.visual.desc":"An interactive page for light, lens language, and visual style study.",
 
     "blog.label":"Blog",
     "blog.heading":"Thoughts<span> & </span>insights",
